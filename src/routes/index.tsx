@@ -67,17 +67,6 @@ function Index() {
         >
           اكتب اسمك واصنع بطاقتك المخصصة باسمك
         </p>
-        <p
-          className="mt-2 text-xs sm:text-sm font-medium"
-          style={{ color: "#92BF55" }}
-        >
-          {new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          }).format(new Date())}
-        </p>
-      </section>
 
       {/* Card Preview */}
       <section className="w-full px-4 mt-8 flex justify-center">
