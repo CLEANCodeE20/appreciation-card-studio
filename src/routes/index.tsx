@@ -86,17 +86,17 @@ function Index() {
           {/* Name overlay - positioned where the original name appears in the template */}
           <div
             className="absolute left-0 right-0 flex items-center justify-center px-4"
-            style={{ top: "73%" }}
+            style={{ top: "82%" }}
           >
             <span
-              className="font-semibold text-center leading-tight"
+              className="text-center leading-tight"
               style={{
-                color: "#92BF55",
+                color: "#FFFFFF",
                 fontSize: "clamp(20px, 5.5vw, 30px)",
                 letterSpacing: "0.02em",
-                textShadow: "0 1px 6px rgba(0,0,0,0.25)",
+                textShadow: "0 1px 6px rgba(0,0,0,0.35)",
                 fontFamily: "'IBM Plex Sans Arabic', sans-serif",
-                fontWeight: 600,
+                fontWeight: 500,
               }}
             >
               {name || "\u00A0"}
