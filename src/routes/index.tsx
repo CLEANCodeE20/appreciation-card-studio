@@ -59,13 +59,23 @@ function Index() {
           className="text-2xl sm:text-3xl md:text-4xl font-semibold leading-snug"
           style={{ color: "#E0DFDC" }}
         >
-          تقديراً لجهودكم وعطائكم
+          عيد أضحى مبارك… شكرًا لجهودكم التي تصنع فرقنا
         </h1>
         <p
           className="mt-3 text-sm sm:text-base font-normal"
           style={{ color: "#CFC7C0" }}
         >
-          اكتب اسمك ليظهر على البطاقة، ثم حمّلها بجودة عالية لمشاركتها.
+          اكتب اسمك واصنع بطاقتك المخصصة باسمك
+        </p>
+        <p
+          className="mt-2 text-xs sm:text-sm font-medium"
+          style={{ color: "#92BF55" }}
+        >
+          {new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          }).format(new Date())}
         </p>
       </section>
 
