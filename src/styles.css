@@ -1,8 +1,22 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap");
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+
+html, body {
+  font-family: "IBM Plex Sans Arabic", sans-serif;
+  background-color: #323C3A;
+}
+
+:root {
+  --onyx: #323C3A;
+  --accent: #92BF55;
+  --pastel: #CFC7C0;
+  --granite: #5E6465;
+  --light: #E0DFDC;
+}
 
 /*
  * Design system definition.
