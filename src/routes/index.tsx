@@ -67,6 +67,8 @@ function Index() {
         >
           اكتب اسمك واصنع بطاقتك المخصصة باسمك
         </p>
+      </section>
+
 
       {/* Card Preview */}
       <section className="w-full px-4 mt-8 flex justify-center">
