@@ -31,13 +31,16 @@ function Index() {
       const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 3,
         cacheBust: true,
+        quality: 1,
       });
       const link = document.createElement("a");
       link.download = `appreciation-${name || "card"}.png`;
       link.href = dataUrl;
       link.click();
+      toast.success("تم تنزيل البطاقة بنجاح بجودة عالية");
     } catch (e) {
       console.error(e);
+      toast.error("تعذّر تنزيل البطاقة، حاول مرة أخرى");
     } finally {
       setDownloading(false);
     }
