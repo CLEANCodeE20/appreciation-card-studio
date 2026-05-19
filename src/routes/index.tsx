@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { toPng } from "html-to-image";
+import { toast } from "sonner";
 import cardTemplate from "@/assets/card-template.jpg";
 import logo from "@/assets/logo.png";
 
