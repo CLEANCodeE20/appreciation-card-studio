@@ -95,7 +95,7 @@ function Index() {
               className="text-center leading-tight"
               style={{
                 color: "#FFFFFF",
-                fontSize: "clamp(20px, 5.5vw, 30px)",
+                fontSize: "clamp(14px, 3.8vw, 20px)",
                 letterSpacing: "0.02em",
                 textShadow: "0 1px 6px rgba(0,0,0,0.35)",
                 fontFamily: "'IBM Plex Sans Arabic', sans-serif",
