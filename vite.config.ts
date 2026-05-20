@@ -1,21 +1,24 @@
-import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
+import path from "path";
 
-export default defineConfig((config) => {
-  config.preview ??= {};
-  config.preview.allowedHosts = [
-    "albasateen-moments.onrender.com",
-  ];
-
-  config.server ??= {};
-  config.server.allowedHosts = [
-    "albasateen-moments.onrender.com",
-  ];
-
-  return {
-    ...config,
-
-    tanstackStart: {
-      server: { entry: "server" },
+export default defineConfig({
+  plugins: [
+    react(),
+    TanStackRouterVite(),
+  ],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
     },
-  };
+  },
+  server: {
+    port: 3000,
+    host: true,
+  },
+  preview: {
+    port: 3000,
+    host: true,
+  },
 });
