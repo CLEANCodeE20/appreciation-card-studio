@@ -94,7 +94,6 @@ function Index() {
             src={cardTemplate}
             alt="قالب البطاقة"
             className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
-            crossOrigin="anonymous"
             draggable={false}
           />
           {/* Name overlay - positioned where the original name appears in the template */}
