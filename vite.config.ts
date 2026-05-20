@@ -16,9 +16,17 @@ export default defineConfig({
   server: {
     port: 3000,
     host: true,
+    allowedHosts: [
+      "albasateen-moments.onrender.com",
+      "localhost",
+    ],
   },
   preview: {
     port: 3000,
     host: true,
+    allowedHosts: [
+      "albasateen-moments.onrender.com",
+      "localhost",
+    ],
   },
 });

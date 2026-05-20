@@ -1,23 +1,23 @@
 # Appreciation Card Studio
 
-تم تصميم هذا المشروع باستخدام TanStack Start و React و TailwindCSS.
+تم تصميم هذا المشروع باستخدام TanStack Router و React و TailwindCSS.
 
 ## التثبيت
 
 ```bash
-bun install
+npm install
 ```
 
 ## التشغيل المحلي
 
 ```bash
-bun run dev
+npm run dev
 ```
 
 ## البناء
 
 ```bash
-bun run build
+npm run build
 ```
 
 ## النشر على Render
@@ -26,7 +26,6 @@ bun run build
 
 1. حساب على [Render](https://render.com)
 2. مستودع Git يحتوي على هذا المشروع
-3. حساب على [Bun](https://bun.sh) (اختياري - يمكن استخدام npm بدلاً منه)
 
 ### خطوات النشر
 
@@ -37,7 +36,7 @@ bun run build
 2. **إنشاء Web Service جديد على Render**
    - سجل الدخول إلى [Render Dashboard](https://dashboard.render.com)
    - اضغط على "New +" ثم "Web Service"
-   - قم بربط مستودع Git الخاص بك
+   - قم بربط المستودع Git الخاص بك
    - سيكتشف Render تلقائياً ملف `render.yaml`
 
 3. **الإعدادات**
@@ -68,13 +67,13 @@ bun run build
 
 ## ملاحظات مهمة
 
-- هذا المشروع يستخدم TanStack Start مع Cloudflare Workers
-- للنشر على Render، تم تكوينه كـ Web Service مع Node.js
-- قد تحتاج إلى تعديل بعض الإعدادات إذا واجهت مشاكل في SSR
+- هذا المشروع يستخدم TanStack Router (SPA)
+- تم تحويله من TanStack Start (SSR) للعمل على Render
+- لا يحتاج إلى Cloudflare Workers
 
 ## الدعم
 
 إذا واجهت أي مشاكل، يرجى:
 1. فتح Issue في المستودع
-2. مراجعة وثائق [TanStack Start](https://tanstack.com/start/latest)
+2. مراجعة وثائق [TanStack Router](https://tanstack.com/router/latest)
 3. مراجعة وثائق [Render](https://render.com/docs)
