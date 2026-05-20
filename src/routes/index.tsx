@@ -39,7 +39,11 @@ function Index() {
       const { downloadCardAsPng } = await import("@/lib/client-utils");
       const { toast } = await import("sonner");
 
-      const result = await downloadCardAsPng(cardRef.current, `appreciation-${name || "card"}.png`, { iosWindow });
+      const result = await downloadCardAsPng(
+        cardRef.current,
+        `appreciation-${name || "card"}.png`,
+        { iosWindow },
+      );
       toast.success(
         result.method === "ios-preview"
           ? "تم تجهيز البطاقة كاملة والتحقق منها، احفظها من النافذة الجديدة"
