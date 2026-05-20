@@ -124,15 +124,28 @@ async function verifyPngBlob(
     throw new Error("فشل التحقق من الصورة: حجم الملف أصغر من المتوقع");
   }
 
-  const objectUrl = URL.createObjectURL(blob);
-  try {
-    const image = await loadImage(objectUrl);
-    if (image.naturalWidth !== expectedWidth || image.naturalHeight !== expectedHeight) {
-      throw new Error("فشل التحقق من الصورة: أبعاد الملف غير صحيحة");
-    }
-  } finally {
-    URL.revokeObjectURL(objectUrl);
+  const header = new Uint8Array(await blob.slice(0, 24).arrayBuffer());
+  const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10];
+  const hasPngSignature = pngSignature.every((byte, index) => header[index] === byte);
+  if (!hasPngSignature) {
+    throw new Error("فشل التحقق من الصورة: الملف ليس PNG صالحًا");
   }
+
+  const view = new DataView(header.buffer);
+  const width = view.getUint32(16);
+  const height = view.getUint32(20);
+  if (width !== expectedWidth || height !== expectedHeight) {
+    throw new Error("فشل التحقق من الصورة: أبعاد الملف غير صحيحة");
+  }
+}
+
+async function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("تعذّر تجهيز معاينة الصورة"));
+    reader.readAsDataURL(blob);
+  });
 }
 
 function renderIOSPreview(
