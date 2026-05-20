@@ -4,8 +4,15 @@ services:
     runtime: node
     plan: free
     buildCommand: bun install && bun run build
-    startCommand: bun run preview
+    startCommand: bun run start
     envVars:
       - key: NODE_VERSION
         value: 20
     autoDeploy: false
+    healthCheckPath: /
+    numInstances: 1
+    headers:
+      - source: /*
+        headers:
+          - key: X-Content-Type-Options
+            value: nosniff
