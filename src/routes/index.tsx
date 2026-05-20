@@ -17,6 +17,14 @@ export const Route = createFileRoute("/")({
   }),
 });
 
+function isIOSDevice() {
+  return (
+    typeof navigator !== "undefined" &&
+    (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1))
+  );
+}
+
 function Index() {
   const [name, setName] = useState("");
   const cardRef = useRef<HTMLDivElement>(null);
@@ -24,18 +32,25 @@ function Index() {
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
+    const iosWindow = isIOSDevice() ? window.open("", "_blank") : null;
     setDownloading(true);
     try {
       // Dynamic import of client-side utilities
       const { downloadCardAsPng } = await import("@/lib/client-utils");
       const { toast } = await import("sonner");
-      
-      await downloadCardAsPng(
+
+      const result = await downloadCardAsPng(
         cardRef.current,
-        `appreciation-${name || "card"}.png`
+        `appreciation-${name || "card"}.png`,
+        { iosWindow },
       );
-      toast.success("تم تنزيل البطاقة بنجاح بجودة عالية");
+      toast.success(
+        result.method === "ios-preview"
+          ? "تم تجهيز البطاقة كاملة والتحقق منها، احفظها من النافذة الجديدة"
+          : "تم تنزيل البطاقة كاملة والتحقق منها بجودة عالية",
+      );
     } catch (e) {
+      iosWindow?.close();
       console.error(e);
       const { toast } = await import("sonner");
       toast.error("تعذّر تنزيل البطاقة، حاول مرة أخرى");
@@ -63,14 +78,10 @@ function Index() {
         >
           عيد أضحى مبارك… شكرًا لجهودكم التي تصنع فرقنا
         </h1>
-        <p
-          className="mt-3 text-sm sm:text-base font-normal"
-          style={{ color: "#CFC7C0" }}
-        >
+        <p className="mt-3 text-sm sm:text-base font-normal" style={{ color: "#CFC7C0" }}>
           اكتب اسمك واصنع بطاقتك المخصصة باسمك
         </p>
       </section>
-
 
       {/* Card Preview */}
       <section className="w-full px-4 mt-8 flex justify-center">
@@ -92,6 +103,7 @@ function Index() {
             style={{ top: "82%" }}
           >
             <span
+              data-card-name
               className="text-center leading-tight"
               style={{
                 color: "#FFFFFF",
