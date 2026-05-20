@@ -1,64 +1,238 @@
 // Client-side utilities only - contains DOM operations
 // This file should only be imported dynamically in client components
 
-async function waitForImages(element: HTMLElement): Promise<void> {
-  const imgs = Array.from(element.querySelectorAll("img"));
-  await Promise.all(
-    imgs.map((img) => {
-      if (img.complete && img.naturalWidth > 0) return Promise.resolve();
-      return new Promise<void>((resolve) => {
-        img.onload = () => resolve();
-        img.onerror = () => resolve();
-      });
-    })
+export type DownloadCardResult = {
+  verified: true;
+  width: number;
+  height: number;
+  size: number;
+  method: "download" | "ios-preview";
+};
+
+type DownloadCardOptions = {
+  pixelRatio?: number;
+  iosWindow?: Window | null;
+};
+
+function isIOSDevice(): boolean {
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
   );
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>'"]/g, (char) => {
+    const entities: Record<string, string> = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "'": "&#39;",
+      '"': "&quot;",
+    };
+    return entities[char];
+  });
+}
+
+async function waitForImage(img: HTMLImageElement): Promise<void> {
+  if (img.complete && img.naturalWidth > 0) return;
+
+  await new Promise<void>((resolve, reject) => {
+    img.onload = () => resolve();
+    img.onerror = () => reject(new Error("تعذّر تحميل قالب البطاقة"));
+  });
+}
+
+async function loadImage(src: string): Promise<HTMLImageElement> {
+  const image = new Image();
+  image.crossOrigin = "anonymous";
+  image.decoding = "sync";
+
+  const loaded = new Promise<HTMLImageElement>((resolve, reject) => {
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("تعذّر تجهيز صورة البطاقة"));
+  });
+
+  image.src = src;
+  return loaded;
+}
+
+async function waitForCardFont(text: string, fontSize: number, fontFamily: string) {
+  if (!("fonts" in document)) return;
+
+  const fonts = document.fonts;
+  await fonts.ready;
+  await fonts.load(`500 ${fontSize}px ${fontFamily}`, text || "بطاقة");
+}
+
+function verifyCanvasHasFullImage(
+  context: CanvasRenderingContext2D,
+  width: number,
+  height: number
+): void {
+  const columns = 9;
+  const rows = 9;
+  let opaqueSamples = 0;
+
+  for (let row = 1; row <= rows; row++) {
+    for (let column = 1; column <= columns; column++) {
+      const x = Math.floor((width * column) / (columns + 1));
+      const y = Math.floor((height * row) / (rows + 1));
+      const [, , , alpha] = context.getImageData(x, y, 1, 1).data;
+      if (alpha > 240) opaqueSamples += 1;
+    }
+  }
+
+  if (opaqueSamples < columns * rows * 0.85) {
+    throw new Error("فشل التحقق من الصورة: القالب غير ظاهر بالكامل");
+  }
+}
+
+async function canvasToPngBlob(canvas: HTMLCanvasElement): Promise<Blob> {
+  const blob = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob(resolve, "image/png", 1)
+  );
+
+  if (!blob) {
+    const dataUrl = canvas.toDataURL("image/png", 1);
+    const response = await fetch(dataUrl);
+    return response.blob();
+  }
+
+  return blob;
+}
+
+async function verifyPngBlob(
+  blob: Blob,
+  expectedWidth: number,
+  expectedHeight: number
+): Promise<void> {
+  const minimumSize = Math.max(80_000, expectedWidth * expectedHeight * 0.02);
+  if (blob.size < minimumSize) {
+    throw new Error("فشل التحقق من الصورة: حجم الملف أصغر من المتوقع");
+  }
+
+  const objectUrl = URL.createObjectURL(blob);
+  try {
+    const image = await loadImage(objectUrl);
+    if (image.naturalWidth !== expectedWidth || image.naturalHeight !== expectedHeight) {
+      throw new Error("فشل التحقق من الصورة: أبعاد الملف غير صحيحة");
+    }
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
+function renderIOSPreview(
+  iosWindow: Window | null | undefined,
+  dataUrl: string,
+  filename: string
+): void {
+  const safeFilename = escapeHtml(filename);
+  const targetWindow = iosWindow ?? window.open("", "_blank");
+  if (!targetWindow) {
+    throw new Error("تعذّر فتح نافذة حفظ الصورة على الآيفون");
+  }
+
+  targetWindow.document.open();
+  targetWindow.document.write(`<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <title>${safeFilename}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body { margin: 0; min-height: 100vh; background: #111; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      main { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px 16px 84px; box-sizing: border-box; }
+      img { width: min(100%, 520px); height: auto; display: block; box-shadow: 0 18px 60px rgba(0,0,0,.38); }
+      p { position: fixed; inset-inline: 0; bottom: 0; margin: 0; padding: 14px 18px calc(14px + env(safe-area-inset-bottom)); background: rgba(0,0,0,.78); font-size: 14px; line-height: 1.7; text-align: center; }
+    </style>
+  </head>
+  <body>
+    <main><img src="${dataUrl}" alt="${safeFilename}" /></main>
+    <p>تم تجهيز الصورة كاملة. اضغط مطولًا على البطاقة ثم اختر حفظ في الصور.</p>
+  </body>
+</html>`);
+  targetWindow.document.close();
 }
 
 export async function downloadCardAsPng(
   element: HTMLElement,
-  filename: string
-): Promise<void> {
-  // Dynamic import of browser-only library
-  const { toPng } = await import("html-to-image");
+  filename: string,
+  options: DownloadCardOptions = {}
+): Promise<DownloadCardResult> {
+  const templateImage = element.querySelector("img") as HTMLImageElement | null;
+  const nameElement = element.querySelector("[data-card-name]") as HTMLElement | null;
 
-  // Ensure all images are fully loaded before capture (iOS Safari fix)
-  await waitForImages(element);
-
-  const options = {
-    pixelRatio: 3,
-    cacheBust: true,
-    quality: 1,
-    skipFonts: false,
-  };
-
-  // iOS Safari workaround: html-to-image often produces a blank/partial image
-  // on the first call because images aren't yet inlined. Call multiple times.
-  let dataUrl = "";
-  for (let i = 0; i < 3; i++) {
-    dataUrl = await toPng(element, options);
+  if (!templateImage) {
+    throw new Error("لم يتم العثور على قالب البطاقة");
   }
 
-  // iOS Safari blocks programmatic downloads via <a download>.
-  // Open the image in a new tab so the user can long-press to save.
-  const isIOS =
-    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  await waitForImage(templateImage);
 
-  if (isIOS) {
-    const win = window.open();
-    if (win) {
-      win.document.write(
-        `<html><head><title>${filename}</title><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;"><img src="${dataUrl}" alt="${filename}" style="max-width:100%;height:auto;display:block;" /><p style="position:fixed;bottom:0;left:0;right:0;margin:0;padding:12px;background:rgba(0,0,0,0.7);color:#fff;text-align:center;font-family:sans-serif;font-size:14px;">اضغط مطولًا على الصورة ثم اختر "حفظ في الصور"</p></body></html>`
-      );
-      win.document.close();
-    }
-    return;
+  const sourceImage = await loadImage(templateImage.currentSrc || templateImage.src);
+  const rect = element.getBoundingClientRect();
+  const pixelRatio = options.pixelRatio ?? 3;
+  const width = Math.round(Math.max(rect.width, 1) * pixelRatio);
+  const height = Math.round(Math.max(rect.height, 1) * pixelRatio);
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const context = canvas.getContext("2d");
+  if (!context) {
+    throw new Error("تعذّر إنشاء ملف الصورة");
   }
 
+  context.clearRect(0, 0, width, height);
+  context.drawImage(sourceImage, 0, 0, width, height);
+
+  const nameText = nameElement?.textContent?.trim() ?? "";
+  if (nameElement && nameText) {
+    const computed = window.getComputedStyle(nameElement);
+    const fontSize = Number.parseFloat(computed.fontSize || "20") * pixelRatio;
+    const fontFamily = computed.fontFamily || '"IBM Plex Sans Arabic", sans-serif';
+    const nameRect = nameElement.getBoundingClientRect();
+    const containerRect = nameElement.parentElement?.getBoundingClientRect() ?? rect;
+    const x = (nameRect.left + nameRect.width / 2 - rect.left) * pixelRatio;
+    const y = (nameRect.top + nameRect.height / 2 - rect.top) * pixelRatio;
+    const maxWidth = Math.max(containerRect.width * pixelRatio, width * 0.7);
+
+    await waitForCardFont(nameText, fontSize, fontFamily);
+
+    context.save();
+    context.direction = "rtl";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.font = `${computed.fontWeight || 500} ${fontSize}px ${fontFamily}`;
+    context.fillStyle = computed.color || "#FFFFFF";
+    context.shadowColor = "rgba(0, 0, 0, 0.35)";
+    context.shadowBlur = 6 * pixelRatio;
+    context.shadowOffsetY = 1 * pixelRatio;
+    context.fillText(nameText, x, y, maxWidth);
+    context.restore();
+  }
+
+  verifyCanvasHasFullImage(context, width, height);
+
+  const blob = await canvasToPngBlob(canvas);
+  await verifyPngBlob(blob, width, height);
+
+  const dataUrl = canvas.toDataURL("image/png", 1);
+  if (isIOSDevice()) {
+    renderIOSPreview(options.iosWindow, dataUrl, filename);
+    return { verified: true, width, height, size: blob.size, method: "ios-preview" };
+  }
+
+  const objectUrl = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.download = filename;
-  link.href = dataUrl;
+  link.href = objectUrl;
+  document.body.appendChild(link);
   link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+
+  return { verified: true, width, height, size: blob.size, method: "download" };
 }
 
 export function focusInputById(id: string): void {
