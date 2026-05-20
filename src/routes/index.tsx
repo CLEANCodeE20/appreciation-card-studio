@@ -1,7 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import { toPng } from "html-to-image";
-import { toast } from "sonner";
 import cardTemplate from "@/assets/card-template.jpg";
 import logo from "@/assets/logo.png";
 
@@ -28,18 +26,18 @@ function Index() {
     if (!cardRef.current) return;
     setDownloading(true);
     try {
-      const dataUrl = await toPng(cardRef.current, {
-        pixelRatio: 3,
-        cacheBust: true,
-        quality: 1,
-      });
-      const link = document.createElement("a");
-      link.download = `appreciation-${name || "card"}.png`;
-      link.href = dataUrl;
-      link.click();
+      // Dynamic import of client-side utilities
+      const { downloadCardAsPng } = await import("@/lib/client-utils");
+      const { toast } = await import("sonner");
+      
+      await downloadCardAsPng(
+        cardRef.current,
+        `appreciation-${name || "card"}.png`
+      );
       toast.success("تم تنزيل البطاقة بنجاح بجودة عالية");
     } catch (e) {
       console.error(e);
+      const { toast } = await import("sonner");
       toast.error("تعذّر تنزيل البطاقة، حاول مرة أخرى");
     } finally {
       setDownloading(false);
@@ -135,7 +133,10 @@ function Index() {
       <section className="w-full max-w-md px-6 mt-6 mb-12 flex flex-col sm:flex-row gap-3">
         <button
           type="button"
-          onClick={() => document.getElementById("name")?.focus()}
+          onClick={async () => {
+            const { focusInputById } = await import("@/lib/client-utils");
+            focusInputById("name");
+          }}
           className="flex-1 rounded-full py-4 text-base font-semibold transition-all duration-200 hover:brightness-90 active:scale-[0.98]"
           style={{
             backgroundColor: "#92BF55",
