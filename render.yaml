@@ -1,12 +1,11 @@
 services:
-  - type: web
+  - type: site
     name: appreciation-card-studio
-    runtime: node
+    runtime: static
     plan: free
     buildCommand: npm install && npm run build
-    startCommand: npm run start
+    publishDir: dist
     envVars:
       - key: NODE_VERSION
         value: 20
     autoDeploy: false
-    healthCheckPath: /
