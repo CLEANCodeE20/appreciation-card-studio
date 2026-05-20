@@ -181,7 +181,7 @@ export async function downloadCardAsPng(
 
   await waitForImage(templateImage);
 
-  const sourceImage = await loadImage(templateImage.currentSrc || templateImage.src);
+  const sourceImage = await loadImageViaBlob(templateImage.currentSrc || templateImage.src);
   const rect = element.getBoundingClientRect();
   const pixelRatio = options.pixelRatio ?? 3;
   const width = Math.round(Math.max(rect.width, 1) * pixelRatio);
