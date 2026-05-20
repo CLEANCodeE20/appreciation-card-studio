@@ -1,17 +1,15 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { mergeConfig } from "vite";
 
-export default defineConfig({
-  tanstackStart: {
-    server: { entry: "server" },
-  },
-
-  vite: {
-    server: {
-      allowedHosts: ["albasateen-moments.onrender.com"],
+export default mergeConfig(
+  defineConfig({
+    tanstackStart: {
+      server: { entry: "server" },
     },
-
+  }),
+  {
     preview: {
       allowedHosts: ["albasateen-moments.onrender.com"],
     },
-  },
-});
+  }
+);
