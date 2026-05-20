@@ -242,8 +242,8 @@ export async function downloadCardAsPng(
   const blob = await canvasToPngBlob(canvas);
   await verifyPngBlob(blob, width, height);
 
-  const dataUrl = canvas.toDataURL("image/png", 1);
   if (isIOSDevice()) {
+    const dataUrl = await blobToDataUrl(blob);
     renderIOSPreview(options.iosWindow, dataUrl, filename);
     return { verified: true, width, height, size: blob.size, method: "ios-preview" };
   }
