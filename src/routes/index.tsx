@@ -17,6 +17,14 @@ export const Route = createFileRoute("/")({
   }),
 });
 
+function isIOSDevice() {
+  return (
+    typeof navigator !== "undefined" &&
+    (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1))
+  );
+}
+
 function Index() {
   const [name, setName] = useState("");
   const cardRef = useRef<HTMLDivElement>(null);
@@ -24,6 +32,7 @@ function Index() {
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
+    const iosWindow = isIOSDevice() ? window.open("", "_blank") : null;
     setDownloading(true);
     try {
       // Dynamic import of client-side utilities
@@ -32,10 +41,12 @@ function Index() {
       
       await downloadCardAsPng(
         cardRef.current,
-        `appreciation-${name || "card"}.png`
+        `appreciation-${name || "card"}.png`,
+        { iosWindow }
       );
       toast.success("تم تنزيل البطاقة بنجاح بجودة عالية");
     } catch (e) {
+      iosWindow?.close();
       console.error(e);
       const { toast } = await import("sonner");
       toast.error("تعذّر تنزيل البطاقة، حاول مرة أخرى");
@@ -92,6 +103,7 @@ function Index() {
             style={{ top: "82%" }}
           >
             <span
+              data-card-name
               className="text-center leading-tight"
               style={{
                 color: "#FFFFFF",
