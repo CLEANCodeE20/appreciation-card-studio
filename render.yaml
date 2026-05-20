@@ -4,7 +4,7 @@ services:
     runtime: static
     plan: free
     buildCommand: npm install && npm run build
-    publishDir: dist
+    publishDir: ./dist
     envVars:
       - key: NODE_VERSION
         value: 20
