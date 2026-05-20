@@ -39,10 +39,7 @@ function Index() {
       const { downloadCardAsPng } = await import("@/lib/client-utils");
       const { toast } = await import("sonner");
 
-      const result = await downloadCardAsPng(
-        cardRef.current,
-        `appreciation-${name || "card"}.png`,
-      );
+      const result = await downloadCardAsPng(cardRef.current, `appreciation-${name || "card"}.png`);
 
       if (result.method === "ios-preview" && result.dataUrl) {
         setPreviewImage(result.dataUrl);
@@ -185,11 +182,14 @@ function Index() {
             <DialogDescription className="text-[#CFC7C0] text-sm leading-relaxed text-center flex flex-col gap-2">
               <span>
                 تم تجهيز الصورة كاملة بنجاح! اضغط مطولاً على البطاقة بالأسفل ثم اختر{" "}
-                <span className="font-semibold text-white">"حفظ في الصور"</span>.
+                <span className="font-semibold text-white">'حفظ في الصور'</span>.
               </span>
-              <span className="text-xs border-t border-[#CFC7C0]/10 pt-2 opacity-90 block" dir="ltr">
-                The complete image has been prepared successfully! Press and hold the card below, then select{" "}
-                <span className="font-semibold text-white">"Save Image"</span>.
+              <span
+                className="text-xs border-t border-[#CFC7C0]/10 pt-2 opacity-90 block"
+                dir="ltr"
+              >
+                The complete image has been prepared successfully! Press and hold the card below,
+                then select <span className="font-semibold text-white">'Save Image'</span>.
               </span>
             </DialogDescription>
           </DialogHeader>

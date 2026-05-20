@@ -165,9 +165,15 @@ export async function downloadCardAsPng(
   const sourceImage = await loadImageViaBlob(templateImage.currentSrc || templateImage.src);
   const rect = element.getBoundingClientRect();
   // Calculate dynamic scale to match original template resolution for maximum export quality
-  const scale = sourceImage.naturalWidth > 0 ? (sourceImage.naturalWidth / rect.width) : 3;
-  const width = sourceImage.naturalWidth > 0 ? sourceImage.naturalWidth : Math.round(Math.max(rect.width, 1) * scale);
-  const height = sourceImage.naturalHeight > 0 ? sourceImage.naturalHeight : Math.round(Math.max(rect.height, 1) * scale);
+  const scale = sourceImage.naturalWidth > 0 ? sourceImage.naturalWidth / rect.width : 3;
+  const width =
+    sourceImage.naturalWidth > 0
+      ? sourceImage.naturalWidth
+      : Math.round(Math.max(rect.width, 1) * scale);
+  const height =
+    sourceImage.naturalHeight > 0
+      ? sourceImage.naturalHeight
+      : Math.round(Math.max(rect.height, 1) * scale);
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;

@@ -5,17 +5,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
-html, body {
+html,
+body {
   font-family: "IBM Plex Sans Arabic", sans-serif;
-  background-color: #323C3A;
+  background-color: #323c3a;
 }
 
 :root {
-  --onyx: #323C3A;
-  --accent: #92BF55;
-  --pastel: #CFC7C0;
-  --granite: #5E6465;
-  --light: #E0DFDC;
+  --onyx: #323c3a;
+  --accent: #92bf55;
+  --pastel: #cfc7c0;
+  --granite: #5e6465;
+  --light: #e0dfdc;
 }
 
 /*

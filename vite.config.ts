@@ -5,11 +5,7 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 
 export default defineConfig({
-  plugins: [
-    react(),
-    TanStackRouterVite(),
-    tailwindcss(),
-  ],
+  plugins: [react(), TanStackRouterVite(), tailwindcss()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -22,17 +18,11 @@ export default defineConfig({
   server: {
     port: 3000,
     host: true,
-    allowedHosts: [
-      "albasateen-moments.onrender.com",
-      "localhost",
-    ],
+    allowedHosts: ["albasateen-moments.onrender.com", "localhost"],
   },
   preview: {
     port: 3000,
     host: true,
-    allowedHosts: [
-      "albasateen-moments.onrender.com",
-      "localhost",
-    ],
+    allowedHosts: ["albasateen-moments.onrender.com", "localhost"],
   },
 });

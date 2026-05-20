@@ -74,6 +74,7 @@ npm run build
 ## الدعم
 
 إذا واجهت أي مشاكل، يرجى:
+
 1. فتح Issue في المستودع
 2. مراجعة وثائق [TanStack Router](https://tanstack.com/router/latest)
 3. مراجعة وثائق [Render](https://render.com/docs)
