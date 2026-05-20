@@ -45,16 +45,30 @@ async function waitForImage(img: HTMLImageElement): Promise<void> {
 
 async function loadImage(src: string): Promise<HTMLImageElement> {
   const image = new Image();
-  image.crossOrigin = "anonymous";
-  image.decoding = "sync";
-
   const loaded = new Promise<HTMLImageElement>((resolve, reject) => {
     image.onload = () => resolve(image);
     image.onerror = () => reject(new Error("تعذّر تجهيز صورة البطاقة"));
   });
-
   image.src = src;
   return loaded;
+}
+
+async function loadImageViaBlob(src: string): Promise<HTMLImageElement> {
+  // Fetch as blob then load via object URL to avoid any CORS taint on iOS Safari.
+  try {
+    const response = await fetch(src, { mode: "cors", credentials: "omit" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    try {
+      return await loadImage(objectUrl);
+    } finally {
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 2000);
+    }
+  } catch {
+    // Fallback: direct image load (same-origin assets)
+    return loadImage(src);
+  }
 }
 
 async function waitForCardFont(text: string, fontSize: number, fontFamily: string) {
