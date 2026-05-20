@@ -38,12 +38,8 @@ function Index() {
       // Dynamic import of client-side utilities
       const { downloadCardAsPng } = await import("@/lib/client-utils");
       const { toast } = await import("sonner");
-      
-      await downloadCardAsPng(
-        cardRef.current,
-        `appreciation-${name || "card"}.png`,
-        { iosWindow }
-      );
+
+      await downloadCardAsPng(cardRef.current, `appreciation-${name || "card"}.png`, { iosWindow });
       toast.success("تم تنزيل البطاقة بنجاح بجودة عالية");
     } catch (e) {
       iosWindow?.close();
@@ -74,14 +70,10 @@ function Index() {
         >
           عيد أضحى مبارك… شكرًا لجهودكم التي تصنع فرقنا
         </h1>
-        <p
-          className="mt-3 text-sm sm:text-base font-normal"
-          style={{ color: "#CFC7C0" }}
-        >
+        <p className="mt-3 text-sm sm:text-base font-normal" style={{ color: "#CFC7C0" }}>
           اكتب اسمك واصنع بطاقتك المخصصة باسمك
         </p>
       </section>
-
 
       {/* Card Preview */}
       <section className="w-full px-4 mt-8 flex justify-center">

@@ -68,7 +68,7 @@ async function waitForCardFont(text: string, fontSize: number, fontFamily: strin
 function verifyCanvasHasFullImage(
   context: CanvasRenderingContext2D,
   width: number,
-  height: number
+  height: number,
 ): void {
   const columns = 9;
   const rows = 9;
@@ -89,9 +89,7 @@ function verifyCanvasHasFullImage(
 }
 
 async function canvasToPngBlob(canvas: HTMLCanvasElement): Promise<Blob> {
-  const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, "image/png", 1)
-  );
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png", 1));
 
   if (!blob) {
     const dataUrl = canvas.toDataURL("image/png", 1);
@@ -105,7 +103,7 @@ async function canvasToPngBlob(canvas: HTMLCanvasElement): Promise<Blob> {
 async function verifyPngBlob(
   blob: Blob,
   expectedWidth: number,
-  expectedHeight: number
+  expectedHeight: number,
 ): Promise<void> {
   const minimumSize = Math.max(80_000, expectedWidth * expectedHeight * 0.02);
   if (blob.size < minimumSize) {
@@ -126,7 +124,7 @@ async function verifyPngBlob(
 function renderIOSPreview(
   iosWindow: Window | null | undefined,
   dataUrl: string,
-  filename: string
+  filename: string,
 ): void {
   const safeFilename = escapeHtml(filename);
   const targetWindow = iosWindow ?? window.open("", "_blank");
@@ -158,7 +156,7 @@ function renderIOSPreview(
 export async function downloadCardAsPng(
   element: HTMLElement,
   filename: string,
-  options: DownloadCardOptions = {}
+  options: DownloadCardOptions = {},
 ): Promise<DownloadCardResult> {
   const templateImage = element.querySelector("img") as HTMLImageElement | null;
   const nameElement = element.querySelector("[data-card-name]") as HTMLElement | null;
