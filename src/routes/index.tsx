@@ -39,8 +39,12 @@ function Index() {
       const { downloadCardAsPng } = await import("@/lib/client-utils");
       const { toast } = await import("sonner");
 
-      await downloadCardAsPng(cardRef.current, `appreciation-${name || "card"}.png`, { iosWindow });
-      toast.success("تم تنزيل البطاقة بنجاح بجودة عالية");
+      const result = await downloadCardAsPng(cardRef.current, `appreciation-${name || "card"}.png`, { iosWindow });
+      toast.success(
+        result.method === "ios-preview"
+          ? "تم تجهيز البطاقة كاملة والتحقق منها، احفظها من النافذة الجديدة"
+          : "تم تنزيل البطاقة كاملة والتحقق منها بجودة عالية",
+      );
     } catch (e) {
       iosWindow?.close();
       console.error(e);
