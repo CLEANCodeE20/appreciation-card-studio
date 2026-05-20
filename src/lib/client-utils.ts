@@ -164,9 +164,10 @@ export async function downloadCardAsPng(
 
   const sourceImage = await loadImageViaBlob(templateImage.currentSrc || templateImage.src);
   const rect = element.getBoundingClientRect();
-  const pixelRatio = options.pixelRatio ?? 3;
-  const width = Math.round(Math.max(rect.width, 1) * pixelRatio);
-  const height = Math.round(Math.max(rect.height, 1) * pixelRatio);
+  // Calculate dynamic scale to match original template resolution for maximum export quality
+  const scale = sourceImage.naturalWidth > 0 ? (sourceImage.naturalWidth / rect.width) : 3;
+  const width = sourceImage.naturalWidth > 0 ? sourceImage.naturalWidth : Math.round(Math.max(rect.width, 1) * scale);
+  const height = sourceImage.naturalHeight > 0 ? sourceImage.naturalHeight : Math.round(Math.max(rect.height, 1) * scale);
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
@@ -182,13 +183,13 @@ export async function downloadCardAsPng(
   const nameText = nameElement?.textContent?.trim() ?? "";
   if (nameElement && nameText) {
     const computed = window.getComputedStyle(nameElement);
-    const fontSize = Number.parseFloat(computed.fontSize || "20") * pixelRatio;
+    const fontSize = Number.parseFloat(computed.fontSize || "20") * scale;
     const fontFamily = computed.fontFamily || '"IBM Plex Sans Arabic", sans-serif';
     const nameRect = nameElement.getBoundingClientRect();
     const containerRect = nameElement.parentElement?.getBoundingClientRect() ?? rect;
-    const x = (nameRect.left + nameRect.width / 2 - rect.left) * pixelRatio;
-    const y = (nameRect.top + nameRect.height / 2 - rect.top) * pixelRatio;
-    const maxWidth = Math.max(containerRect.width * pixelRatio, width * 0.7);
+    const x = (nameRect.left + nameRect.width / 2 - rect.left) * scale;
+    const y = (nameRect.top + nameRect.height / 2 - rect.top) * scale;
+    const maxWidth = Math.max(containerRect.width * scale, width * 0.7);
 
     await waitForCardFont(nameText, fontSize, fontFamily);
 
@@ -199,8 +200,8 @@ export async function downloadCardAsPng(
     context.font = `${computed.fontWeight || 500} ${fontSize}px ${fontFamily}`;
     context.fillStyle = computed.color || "#FFFFFF";
     context.shadowColor = "rgba(0, 0, 0, 0.35)";
-    context.shadowBlur = 6 * pixelRatio;
-    context.shadowOffsetY = 1 * pixelRatio;
+    context.shadowBlur = 6 * scale;
+    context.shadowOffsetY = 1 * scale;
     context.fillText(nameText, x, y, maxWidth);
     context.restore();
   }

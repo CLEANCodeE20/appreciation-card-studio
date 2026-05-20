@@ -102,14 +102,14 @@ function Index() {
           {/* Name overlay - positioned where the original name appears in the template */}
           <div
             className="absolute left-0 right-0 flex items-center justify-center px-4"
-            style={{ top: "82%" }}
+            style={{ top: "80.5%" }}
           >
             <span
               data-card-name
               className="text-center leading-tight"
               style={{
                 color: "#FFFFFF",
-                fontSize: "clamp(14px, 3.8vw, 20px)",
+                fontSize: "clamp(16px, 4.2vw, 23px)",
                 letterSpacing: "0.02em",
                 textShadow: "0 1px 6px rgba(0,0,0,0.35)",
                 fontFamily: "'IBM Plex Sans Arabic', sans-serif",
@@ -182,9 +182,15 @@ function Index() {
             <DialogTitle className="text-xl font-bold text-[#E0DFDC] font-sans">
               حفظ بطاقة التهنئة
             </DialogTitle>
-            <DialogDescription className="text-[#CFC7C0] text-sm leading-relaxed text-center">
-              تم تجهيز بطاقتك بنجاح! اضغط مطولاً على البطاقة بالأسفل ثم اختر{" "}
-              <span className="font-semibold text-white">"حفظ في الصور" (Save Image)</span>.
+            <DialogDescription className="text-[#CFC7C0] text-sm leading-relaxed text-center flex flex-col gap-2">
+              <span>
+                تم تجهيز الصورة كاملة بنجاح! اضغط مطولاً على البطاقة بالأسفل ثم اختر{" "}
+                <span className="font-semibold text-white">"حفظ في الصور"</span>.
+              </span>
+              <span className="text-xs border-t border-[#CFC7C0]/10 pt-2 opacity-90 block" dir="ltr">
+                The complete image has been prepared successfully! Press and hold the card below, then select{" "}
+                <span className="font-semibold text-white">"Save Image"</span>.
+              </span>
             </DialogDescription>
           </DialogHeader>
 
