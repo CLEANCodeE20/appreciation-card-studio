@@ -6,12 +6,12 @@ export type DownloadCardResult = {
   width: number;
   height: number;
   size: number;
-  method: "download" | "ios-preview";
+  method: "download" | "ios-preview" | "share";
+  dataUrl?: string;
 };
 
 type DownloadCardOptions = {
   pixelRatio?: number;
-  iosWindow?: Window | null;
 };
 
 function isIOSDevice(): boolean {
@@ -148,38 +148,6 @@ async function blobToDataUrl(blob: Blob): Promise<string> {
   });
 }
 
-function renderIOSPreview(
-  iosWindow: Window | null | undefined,
-  dataUrl: string,
-  filename: string,
-): void {
-  const safeFilename = escapeHtml(filename);
-  const targetWindow = iosWindow ?? window.open("", "_blank");
-  if (!targetWindow) {
-    throw new Error("تعذّر فتح نافذة حفظ الصورة على الآيفون");
-  }
-
-  targetWindow.document.open();
-  targetWindow.document.write(`<!doctype html>
-<html lang="ar" dir="rtl">
-  <head>
-    <title>${safeFilename}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-      body { margin: 0; min-height: 100vh; background: #111; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-      main { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px 16px 84px; box-sizing: border-box; }
-      img { width: min(100%, 520px); height: auto; display: block; box-shadow: 0 18px 60px rgba(0,0,0,.38); }
-      p { position: fixed; inset-inline: 0; bottom: 0; margin: 0; padding: 14px 18px calc(14px + env(safe-area-inset-bottom)); background: rgba(0,0,0,.78); font-size: 14px; line-height: 1.7; text-align: center; }
-    </style>
-  </head>
-  <body>
-    <main><img src="${dataUrl}" alt="${safeFilename}" /></main>
-    <p>تم تجهيز الصورة كاملة. اضغط مطولًا على البطاقة ثم اختر حفظ في الصور.</p>
-  </body>
-</html>`);
-  targetWindow.document.close();
-}
-
 export async function downloadCardAsPng(
   element: HTMLElement,
   filename: string,
@@ -243,9 +211,24 @@ export async function downloadCardAsPng(
   await verifyPngBlob(blob, width, height);
 
   if (isIOSDevice()) {
+    const file = new File([blob], filename, { type: "image/png" });
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: filename,
+        });
+        return { verified: true, width, height, size: blob.size, method: "share" };
+      } catch (shareError) {
+        if (shareError instanceof Error && shareError.name === "AbortError") {
+          return { verified: true, width, height, size: blob.size, method: "share" };
+        }
+        console.error("Web Share API failed:", shareError);
+      }
+    }
+
     const dataUrl = await blobToDataUrl(blob);
-    renderIOSPreview(options.iosWindow, dataUrl, filename);
-    return { verified: true, width, height, size: blob.size, method: "ios-preview" };
+    return { verified: true, width, height, size: blob.size, method: "ios-preview", dataUrl };
   }
 
   const objectUrl = URL.createObjectURL(blob);

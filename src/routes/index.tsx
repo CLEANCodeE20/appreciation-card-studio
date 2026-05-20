@@ -2,6 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import cardTemplate from "@/assets/card-template.jpg";
 import logo from "@/assets/logo.png";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -17,22 +24,15 @@ export const Route = createFileRoute("/")({
   }),
 });
 
-function isIOSDevice() {
-  return (
-    typeof navigator !== "undefined" &&
-    (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
-      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1))
-  );
-}
-
 function Index() {
   const [name, setName] = useState("");
   const cardRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
-    const iosWindow = isIOSDevice() ? window.open("", "_blank") : null;
     setDownloading(true);
     try {
       // Dynamic import of client-side utilities
@@ -42,15 +42,18 @@ function Index() {
       const result = await downloadCardAsPng(
         cardRef.current,
         `appreciation-${name || "card"}.png`,
-        { iosWindow },
       );
-      toast.success(
-        result.method === "ios-preview"
-          ? "تم تجهيز البطاقة كاملة والتحقق منها، احفظها من النافذة الجديدة"
-          : "تم تنزيل البطاقة كاملة والتحقق منها بجودة عالية",
-      );
+
+      if (result.method === "ios-preview" && result.dataUrl) {
+        setPreviewImage(result.dataUrl);
+        setPreviewOpen(true);
+        toast.success("تم تجهيز البطاقة بنجاح، يرجى حفظها من نافذة المعاينة");
+      } else if (result.method === "share") {
+        toast.success("تمت مشاركة وحفظ البطاقة بنجاح");
+      } else {
+        toast.success("تم تنزيل البطاقة كاملة والتحقق منها بجودة عالية");
+      }
     } catch (e) {
-      iosWindow?.close();
       console.error(e);
       const { toast } = await import("sonner");
       toast.error("تعذّر تنزيل البطاقة، حاول مرة أخرى");
@@ -171,6 +174,44 @@ function Index() {
           {downloading ? "...جاري التحميل" : "تحميل البطاقة PNG"}
         </button>
       </section>
+
+      {/* Dialog for iOS Save Card Preview */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-[440px] w-[90%] p-6 rounded-2xl bg-[#323C3A] border-[#CFC7C0]/20 text-[#E0DFDC] shadow-2xl flex flex-col items-center gap-4">
+          <DialogHeader className="w-full text-center space-y-2">
+            <DialogTitle className="text-xl font-bold text-[#E0DFDC] font-sans">
+              حفظ بطاقة التهنئة
+            </DialogTitle>
+            <DialogDescription className="text-[#CFC7C0] text-sm leading-relaxed text-center">
+              تم تجهيز بطاقتك بنجاح! اضغط مطولاً على البطاقة بالأسفل ثم اختر{" "}
+              <span className="font-semibold text-white">"حفظ في الصور" (Save Image)</span>.
+            </DialogDescription>
+          </DialogHeader>
+
+          {previewImage && (
+            <div className="relative w-full max-w-[280px] aspect-[9/16] mt-2 overflow-hidden rounded-xl shadow-lg border border-[#CFC7C0]/15">
+              <img
+                src={previewImage}
+                alt="بطاقة التهنئة"
+                className="w-full h-full object-cover pointer-events-auto select-auto"
+              />
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setPreviewOpen(false)}
+            className="w-full mt-2 rounded-full py-3.5 text-base font-semibold transition-all duration-200 hover:brightness-95 active:scale-[0.98]"
+            style={{
+              backgroundColor: "#92BF55",
+              color: "#323C3A",
+              fontFamily: "'IBM Plex Sans Arabic', sans-serif",
+            }}
+          >
+            إغلاق
+          </button>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
